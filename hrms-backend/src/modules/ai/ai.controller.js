@@ -1,8 +1,8 @@
 const Employee = require('../../employee/employee.model');
 const { Attendance } = require('../attendance/attendance.model');
 const { LeaveRequest, LeaveBalance } = require('../../leave/leave.model');
-// Import Location model (defined in org.model.js)
-const { Location } = require('../../employee/org.model');
+// Import Location, Department, Designation models (defined in org.model.js)
+const { Location, Department, Designation } = require('../../employee/org.model');
 
 const { HfInference } = require('@huggingface/inference');
 
@@ -223,6 +223,32 @@ systemPrompt,
     } else {
       // No matching location – remove filter to avoid cast error
       delete mongoFilter.location;
+    }
+  }
+
+  // Convert department name (string) to ObjectId if present
+  if (mongoFilter.department && typeof mongoFilter.department === 'string') {
+    const deptDoc = await Department.findOne({
+      name: new RegExp(`^${mongoFilter.department}$`, 'i'),
+      tenantId,
+    });
+    if (deptDoc) {
+      mongoFilter.department = deptDoc._id;
+    } else {
+      delete mongoFilter.department;
+    }
+  }
+
+  // Convert designation name (string) to ObjectId if present
+  if (mongoFilter.designation && typeof mongoFilter.designation === 'string') {
+    const desigDoc = await Designation.findOne({
+      name: new RegExp(`^${mongoFilter.designation}$`, 'i'),
+      tenantId,
+    });
+    if (desigDoc) {
+      mongoFilter.designation = desigDoc._id;
+    } else {
+      delete mongoFilter.designation;
     }
   }
 

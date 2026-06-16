@@ -14,9 +14,63 @@ const calcBusinessDays = (from, to) => {
   return days;
 };
 
+// Helper to ensure default leave types and balances exist
+const ensureDefaultLeaves = async (tenantId, employeeId) => {
+  try {
+    const year = new Date().getFullYear();
+
+    // 1. Fix mismatched tenantId on Employee if needed
+    if (employeeId) {
+      const emp = await Employee.findById(employeeId);
+      if (emp && emp.tenantId.toString() !== tenantId.toString()) {
+        console.log(`Self-healing: fixing tenantId on employee ${employeeId} from ${emp.tenantId} to ${tenantId}`);
+        emp.tenantId = tenantId;
+        await emp.save();
+      }
+    }
+
+    // 2. Ensure default LeaveTypes exist for this tenant
+    const defaultTypes = [
+      { name: 'Casual Leave', code: 'CL', type: 'casual', maxBalancePerYear: 12, color: '#4CAF50' },
+      { name: 'Sick Leave', code: 'SL', type: 'sick', maxBalancePerYear: 10, color: '#F44336' },
+      { name: 'Earned Leave', code: 'EL', type: 'earned', maxBalancePerYear: 15, color: '#2196F3' }
+    ];
+
+    const leaveTypes = [];
+    for (const dt of defaultTypes) {
+      let lt = await LeaveType.findOne({ tenantId, code: dt.code });
+      if (!lt) {
+        lt = await LeaveType.create({ ...dt, tenantId });
+      }
+      leaveTypes.push(lt);
+    }
+
+    // 3. Ensure LeaveBalances exist for this employee
+    if (employeeId) {
+      for (const lt of leaveTypes) {
+        let lb = await LeaveBalance.findOne({ tenantId, employeeId, leaveType: lt._id, year });
+        if (!lb) {
+          await LeaveBalance.create({
+            tenantId,
+            employeeId,
+            leaveType: lt._id,
+            year,
+            totalEntitled: lt.maxBalancePerYear,
+            balance: lt.maxBalancePerYear,
+            taken: 0
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error in ensureDefaultLeaves self-healing:", error);
+  }
+};
+
 // @GET /api/leave/types — Get leave types
 exports.getLeaveTypes = async (req, res) => {
   try {
+    await ensureDefaultLeaves(req.tenantId, req.user?.employeeId);
     const types = await LeaveType.find({ tenantId: req.tenantId, isActive: true });
     res.json({ success: true, data: types });
   } catch (err) {
@@ -39,8 +93,10 @@ exports.getLeaveBalance = async (req, res) => {
   try {
     const { employeeId } = req.query;
     const empId = req.user.role === 'employee' ? req.user.employeeId : (employeeId || req.user.employeeId);
-    const year = new Date().getFullYear();
+    
+    await ensureDefaultLeaves(req.tenantId, empId);
 
+    const year = new Date().getFullYear();
     const balances = await LeaveBalance.find({ tenantId: req.tenantId, employeeId: empId, year })
       .populate('leaveType', 'name code color type');
 
