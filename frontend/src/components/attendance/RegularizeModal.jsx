@@ -26,33 +26,62 @@ export default function RegularizeModal({ onClose, onSuccess }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label className="form-label">Date *</label>
-        <input type="date" className="form-input" value={form.date}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date *</label>
+        <input 
+          type="date" 
+          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-sm" 
+          value={form.date}
           max={new Date().toISOString().split('T')[0]}
-          onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
+          onChange={e => setForm(p => ({ ...p, date: e.target.value }))} 
+          required 
+        />
       </div>
-      <div className="grid-2">
-        <div className="form-group">
-          <label className="form-label">Punch In Time</label>
-          <input type="time" className="form-input" value={form.requestedPunchIn}
-            onChange={e => setForm(p => ({ ...p, requestedPunchIn: e.target.value }))} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Punch In Time</label>
+          <input 
+            type="time" 
+            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-sm" 
+            value={form.requestedPunchIn}
+            onChange={e => setForm(p => ({ ...p, requestedPunchIn: e.target.value }))} 
+          />
         </div>
-        <div className="form-group">
-          <label className="form-label">Punch Out Time</label>
-          <input type="time" className="form-input" value={form.requestedPunchOut}
-            onChange={e => setForm(p => ({ ...p, requestedPunchOut: e.target.value }))} />
+        <div className="space-y-1.5">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Punch Out Time</label>
+          <input 
+            type="time" 
+            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-sm" 
+            value={form.requestedPunchOut}
+            onChange={e => setForm(p => ({ ...p, requestedPunchOut: e.target.value }))} 
+          />
         </div>
       </div>
-      <div className="form-group">
-        <label className="form-label">Reason *</label>
-        <textarea className="form-input" rows={3} placeholder="Explain why regularization is needed..."
-          value={form.reason} onChange={e => setForm(p => ({ ...p, reason: e.target.value }))} required />
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Reason *</label>
+        <textarea 
+          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-sm resize-none" 
+          rows={3} 
+          placeholder="Explain why regularization is needed..."
+          value={form.reason} 
+          onChange={e => setForm(p => ({ ...p, reason: e.target.value }))} 
+          required 
+        />
       </div>
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-        <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
+      <div className="flex gap-2.5 justify-end pt-3 border-t border-slate-100 mt-4">
+        <button 
+          type="button" 
+          className="px-4 py-2 border border-slate-200 bg-white text-xs font-bold text-slate-655 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors" 
+          onClick={onClose}
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          className="px-4 py-2 bg-brand-605 bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white rounded-xl shadow-sm hover:shadow transition-colors disabled:opacity-50 disabled:pointer-events-none" 
+          disabled={loading}
+        >
           {loading ? <span className="spinner" /> : 'Submit Request'}
         </button>
       </div>

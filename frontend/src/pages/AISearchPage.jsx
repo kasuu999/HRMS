@@ -26,8 +26,8 @@ export default function AISearchPage() {
     setLoading(true);
     setResults(null);
     try {
-      const { data } = await aiAPI.search(searchQuery);
-      setResults(data.data);
+      const response = await aiAPI.search(searchQuery);
+      setResults(response.data);
       if (q) setQuery(q);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Search failed');
@@ -37,49 +37,64 @@ export default function AISearchPage() {
   };
 
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">🤖 AI-Powered HR Tools</h1>
-          <p className="page-subtitle">Natural language employee search and HR assistant</p>
-        </div>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="pb-4 border-b border-slate-200/50">
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">🤖 AI-Powered HR Tools</h1>
+        <p className="text-xs text-slate-500 mt-1 font-medium">Natural language employee search and HR assistant</p>
       </div>
 
       {/* Tabs */}
-      <div className="tabs" style={{ marginBottom: 24 }}>
-        <div className={`tab ${tab === 0 ? 'active' : ''}`} onClick={() => setTab(0)}>🔍 Smart Search</div>
-        <div className={`tab ${tab === 1 ? 'active' : ''}`} onClick={() => setTab(1)}>💬 HR Chat Assistant</div>
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl">
+        <div 
+          className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${tab === 0 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
+          onClick={() => setTab(0)}
+        >
+          🔍 Smart Search
+        </div>
+        <div 
+          className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${tab === 1 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
+          onClick={() => setTab(1)}
+        >
+          💬 HR Chat Assistant
+        </div>
       </div>
 
       {/* Smart Search Tab */}
       {tab === 0 && (
-        <div>
-          {/* Search bar */}
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+        <div className="space-y-6">
+          {/* Search bar card */}
+          <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-premium space-y-4">
+            <div className="text-xs text-slate-400 font-bold tracking-wide uppercase">
               Search employees using natural language — no filters needed
             </div>
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
-                className="form-input"
-                style={{ flex: 1, fontSize: 15 }}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all placeholder:text-slate-400 text-sm"
                 placeholder='e.g. "Find all senior developers in Bangalore on probation"'
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
               />
-              <button className="btn btn-primary" style={{ padding: '0 24px' }} onClick={() => handleSearch()} disabled={loading}>
+              <button 
+                className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg focus:ring-4 focus:ring-brand-500/20 transition-all flex items-center justify-center text-sm disabled:opacity-70 shrink-0" 
+                onClick={() => handleSearch()} 
+                disabled={loading}
+              >
                 {loading ? <span className="spinner" /> : '🔍 Search'}
               </button>
             </div>
 
             {/* Example queries */}
-            <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 600 }}>Try these examples:</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Try these examples:</div>
+              <div className="flex flex-wrap gap-2">
                 {EXAMPLE_QUERIES.map(q => (
-                  <button key={q} onClick={() => handleSearch(q)}
-                    style={{ fontSize: 12, padding: '5px 12px', borderRadius: 20, border: '1px solid var(--border)', background: 'var(--bg)', cursor: 'pointer', color: 'var(--primary)', fontWeight: 500 }}>
+                  <button 
+                    key={q} 
+                    onClick={() => handleSearch(q)}
+                    className="text-xs px-3.5 py-1.5 rounded-full border border-slate-205 bg-slate-50/50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors font-medium shadow-sm cursor-pointer"
+                  >
                     {q}
                   </button>
                 ))}
@@ -87,54 +102,49 @@ export default function AISearchPage() {
             </div>
           </div>
 
-          {/* Results */}
+          {/* Loading panel */}
           {loading && (
-            <div className="card" style={{ textAlign: 'center', padding: 48 }}>
-              <div className="spinner" style={{ margin: '0 auto 16px' }} />
-              <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>AI is searching...</p>
+            <div className="bg-white border border-slate-200/60 p-12 rounded-2xl shadow-premium text-center space-y-4">
+              <div className="flex justify-center"><div className="spinner" /></div>
+              <p className="text-slate-450 text-sm font-medium">AI is searching organizational directory...</p>
             </div>
           )}
 
+          {/* Results panel */}
           {results && !loading && (
-            <div>
-              {/* AI Summary */}
-              <div className="card" style={{ marginBottom: 16, background: 'var(--primary-light)', border: '1px solid rgba(59,91,219,0.2)' }}>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: 20 }}>🤖</span>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)', marginBottom: 4 }}>AI Summary</div>
-                    <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6 }}>{results.summary}</div>
-                  </div>
+            <div className="space-y-6">
+              {/* AI Summary Banner */}
+              <div className="bg-brand-50/45 border border-brand-200/25 p-5 rounded-2xl shadow-sm flex items-start gap-4">
+                <span className="text-2xl shrink-0">🤖</span>
+                <div className="space-y-1">
+                  <div className="font-extrabold text-xs text-brand-700 tracking-tight font-heading uppercase tracking-wide">AI Search Summary</div>
+                  <div className="text-slate-700 text-sm leading-relaxed font-normal">{results.summary}</div>
                 </div>
               </div>
 
-              {results.employees.length === 0 ? (
-                <div className="card">
-                  <div className="empty-state">
-                    <p>No employees matched your query</p>
-                    <span style={{ fontSize: 13 }}>Try different search terms</span>
-                  </div>
+              {!results?.employees?.length ? (
+                <div className="text-center py-16 border-2 border-dashed border-slate-150 rounded-2xl bg-white">
+                  <p className="text-slate-500 font-medium text-base">No employees matched your query</p>
+                  <span className="text-xs text-slate-400 font-medium mt-1 block">Try using different skills, designations, locations, or statuses</span>
                 </div>
               ) : (
-                <div>
-                  <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                <div className="space-y-3">
+                  <div className="text-xs text-slate-450 font-bold tracking-wide uppercase px-2">
                     Found <strong>{results.total} employee{results.total !== 1 ? 's' : ''}</strong>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
-                    {results.employees.map(emp => (
-                      <Link key={emp._id} to={`/employees/${emp._id}`} style={{ textDecoration: 'none' }}>
-                        <div className="card" style={{ padding: '16px 18px', cursor: 'pointer', transition: 'box-shadow 0.2s' }}
-                          onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-md)'}
-                          onMouseLeave={e => e.currentTarget.style.boxShadow = ''}>
-                          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {results?.employees?.map(emp => (
+                      <Link key={emp._id} to={`/employees/${emp._id}`} className="block">
+                        <div className="bg-white rounded-2xl border border-slate-200/60 p-5 hover:shadow-premium-hover hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between h-full gap-4">
+                          <div className="flex gap-4 items-center">
                             <Avatar name={`${emp.firstName} ${emp.lastName}`} photo={emp.photo} size="md" />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>{emp.firstName} {emp.lastName}</div>
-                              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{emp.designation?.name || '—'}</div>
-                              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{emp.department?.name} • {emp.location?.city || emp.location?.name}</div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-extrabold text-sm text-slate-800 tracking-tight font-heading truncate">{emp.firstName} {emp.lastName}</div>
+                              <div className="text-xs text-slate-450 font-semibold truncate mt-0.5">{emp.designation?.name || '—'}</div>
+                              <div className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{emp.department?.name} • {emp.location?.city || emp.location?.name}</div>
                             </div>
                           </div>
-                          <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
+                          <div className="flex gap-1.5 pt-2 border-t border-slate-50">
                             <Badge status={emp.status} />
                             <Badge status={emp.employmentType} />
                           </div>
@@ -151,7 +161,7 @@ export default function AISearchPage() {
 
       {/* Chat Tab - full page embedded */}
       {tab === 1 && (
-        <div className="card" style={{ padding: 0, overflow: 'hidden', maxWidth: 700 }}>
+        <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-premium max-w-2xl mx-auto">
           <EmbeddedChat />
         </div>
       )}
@@ -192,30 +202,30 @@ function EmbeddedChat() {
   const QUICK = ['What is my leave balance?', 'How do I apply for sick leave?', 'What happens if I forget to punch in?', 'Explain the attendance policy', 'How is overtime calculated?'];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 560 }}>
-      <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: 22 }}>🤖</span>
+    <div className="flex flex-col h-[520px]">
+      <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+        <span className="text-2xl">🤖</span>
         <div>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>HR Assistant</div>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Powered by Claude AI • Knows your attendance & leave data</div>
+          <div className="font-extrabold text-sm text-slate-800 font-heading">HR Assistant</div>
+          <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Powered by AI • Knows attendance & leave</div>
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-50/40 flex flex-col">
         {messages.map((m, i) => (
-          <div key={i} style={{
-            maxWidth: '80%', padding: '10px 14px', borderRadius: 12, fontSize: 14, lineHeight: 1.6,
-            alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-            background: m.role === 'user' ? 'var(--primary)' : 'var(--bg)',
-            color: m.role === 'user' ? '#fff' : 'var(--text-primary)',
-            borderBottomRightRadius: m.role === 'user' ? 4 : 12,
-            borderBottomLeftRadius: m.role === 'assistant' ? 4 : 12,
-          }}>
+          <div 
+            key={i} 
+            className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
+              m.role === 'user' 
+                ? 'bg-brand-600 text-white self-end rounded-br-sm shadow-sm' 
+                : 'bg-white text-slate-800 self-start rounded-bl-sm border border-slate-205/85 shadow-sm'
+            }`}
+          >
             {m.content}
           </div>
         ))}
         {loading && (
-          <div style={{ alignSelf: 'flex-start', padding: '10px 14px', background: 'var(--bg)', borderRadius: 12, borderBottomLeftRadius: 4 }}>
+          <div className="bg-white text-slate-850 self-start rounded-2xl rounded-bl-sm border border-slate-205/85 shadow-sm px-3.5 py-2.5 flex items-center justify-center">
             <span className="spinner" style={{ width: 14, height: 14 }} />
           </div>
         )}
@@ -223,24 +233,34 @@ function EmbeddedChat() {
       </div>
 
       {messages.length <= 1 && (
-        <div style={{ padding: '0 18px 10px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div className="px-5 pb-3 pt-1 bg-slate-50/40 flex flex-wrap gap-1.5">
           {QUICK.map(q => (
-            <button key={q} onClick={() => setInput(q)}
-              style={{ fontSize: 12, padding: '5px 12px', borderRadius: 20, border: '1px solid var(--border)', background: 'var(--bg)', cursor: 'pointer', color: 'var(--primary)', fontWeight: 500 }}>
+            <button 
+              key={q} 
+              onClick={() => setInput(q)}
+              className="text-[10px] px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-brand-650 hover:bg-slate-50 transition-colors font-semibold shadow-sm cursor-pointer"
+            >
               {q}
             </button>
           ))}
         </div>
       )}
 
-      <div style={{ padding: '12px 18px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
-        <input className="form-input" style={{ flex: 1 }}
+      <div className="p-3.5 border-t border-slate-100 bg-white flex gap-2 items-center">
+        <input 
+          className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-xs"
           placeholder="Ask anything about HR policies, leave, attendance..."
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && send()}
         />
-        <button className="btn btn-primary" onClick={send} disabled={loading || !input.trim()}>Send ➤</button>
+        <button 
+          className="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm hover:shadow transition-colors disabled:opacity-50 shrink-0" 
+          onClick={send} 
+          disabled={loading || !input.trim()}
+        >
+          Send ➤
+        </button>
       </div>
     </div>
   );

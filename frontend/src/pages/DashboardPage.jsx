@@ -60,118 +60,158 @@ export default function DashboardPage() {
   const firstName = user?.email?.split('@')[0] || 'there';
 
   return (
-    <div>
-      <div className="page-header">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
         <div>
-          <h1 className="page-title">Good {getGreeting()}, {firstName} 👋</h1>
-          <p className="page-subtitle">{new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">
+            Good {getGreeting()}, {firstName} 👋
+          </h1>
+          <p className="text-xs text-slate-500 mt-1 font-medium">
+            {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
       </div>
 
-      {/* Top stats */}
-      <div className="stat-grid" style={{ marginBottom: 24 }}>
+      {/* Top Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {headcount && (
-          <div className="stat-card">
-            <div className="label">Total Employees</div>
-            <div className="value" style={{ color: COLORS[0] }}>{headcount.total}</div>
-            <div className="change" style={{ color: '#0CA678' }}>Active headcount</div>
+          <div className="bg-white p-5 rounded-2xl border border-slate-205/65 shadow-premium hover:shadow-premium-hover transition-all duration-200 hover:-translate-y-0.5 flex flex-col">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Employees</span>
+            <span className="text-3xl font-extrabold mt-1 font-heading text-brand-600">{headcount.total}</span>
+            <span className="text-[11px] text-emerald-600 font-semibold mt-2 flex items-center gap-1">
+              🟢 Active headcount
+            </span>
           </div>
         )}
         {pendingCount > 0 && (
-          <div className="stat-card">
-            <div className="label">Pending Approvals</div>
-            <div className="value" style={{ color: COLORS[3] }}>{pendingCount}</div>
-            <Link to="/approvals" style={{ fontSize: 12, color: '#3B5BDB' }}>Review now →</Link>
+          <div className="bg-white p-5 rounded-2xl border border-slate-205/65 shadow-premium hover:shadow-premium-hover transition-all duration-200 hover:-translate-y-0.5 flex flex-col">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pending Approvals</span>
+            <span className="text-3xl font-extrabold mt-1 font-heading text-rose-600">{pendingCount}</span>
+            <Link to="/approvals" className="text-[11px] text-brand-600 hover:text-brand-800 font-semibold mt-2 transition-colors">
+              Review requests now →
+            </Link>
           </div>
         )}
         {leaveBalance.slice(0, 2).map((b, i) => (
-          <div className="stat-card" key={b._id}>
-            <div className="label">{b.leaveType?.name}</div>
-            <div className="value" style={{ color: COLORS[i + 1] }}>{b.balance}</div>
-            <div className="change" style={{ color: '#9CA3AF' }}>Days available</div>
+          <div className="bg-white p-5 rounded-2xl border border-slate-205/65 shadow-premium hover:shadow-premium-hover transition-all duration-200 hover:-translate-y-0.5 flex flex-col" key={b._id}>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{b.leaveType?.name}</span>
+            <span className="text-3xl font-extrabold mt-1 font-heading" style={{ color: COLORS[i + 1] }}>{b.balance}</span>
+            <span className="text-[11px] text-slate-500 font-medium mt-2">Days available</span>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        {/* Attendance punch */}
-        <div className="card">
-          <div className="card-title">Today's Attendance</div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '12px 0' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Attendance Punch Box */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-premium">
+          <h2 className="text-sm font-bold text-slate-900 tracking-tight font-heading border-b border-slate-100 pb-3">
+            Today's Attendance
+          </h2>
+          <div className="flex flex-col items-center gap-4 py-8">
             <button
-              className={`punch-btn ${isPunchedIn ? 'punched-in' : ''}`}
+              className={`w-36 h-36 rounded-full border-4 flex flex-col items-center justify-center gap-1.5 font-extrabold transition-all duration-300 transform active:scale-95 hover:scale-105 disabled:opacity-50 ${
+                isPunchedIn 
+                  ? 'border-rose-100 bg-rose-50 text-rose-600 shadow-md hover:shadow-rose-200/50' 
+                  : isPunchedOut 
+                    ? 'border-emerald-100 bg-emerald-50 text-emerald-600 shadow-md' 
+                    : 'border-brand-100 bg-white text-brand-600 shadow-md hover:shadow-brand-150/40 hover:bg-brand-50/10'
+              }`}
               onClick={handlePunch}
               disabled={punchLoading || isPunchedOut}
             >
               {punchLoading ? <span className="spinner" /> : (
                 <>
-                  <span style={{ fontSize: 28 }}>{isPunchedIn ? '🔴' : isPunchedOut ? '✅' : '⏱'}</span>
-                  <span>{isPunchedIn ? 'Punch Out' : isPunchedOut ? 'Done' : 'Punch In'}</span>
+                  <span className="text-3xl">{isPunchedIn ? '🔴' : isPunchedOut ? '✅' : '⏱'}</span>
+                  <span className="text-xs uppercase tracking-wider font-bold">{isPunchedIn ? 'Punch Out' : isPunchedOut ? 'Done' : 'Punch In'}</span>
                 </>
               )}
             </button>
+            
             {todayAtt?.punchIn && (
-              <div style={{ textAlign: 'center', fontSize: 13, color: '#6B7280' }}>
-                <div>In: <strong style={{ color: '#1A1D2E' }}>{new Date(todayAtt.punchIn).toLocaleTimeString()}</strong></div>
+              <div className="text-center text-xs text-slate-500 space-y-1 mt-2">
+                <div>Punch In: <strong className="text-slate-800 font-semibold">{new Date(todayAtt.punchIn).toLocaleTimeString()}</strong></div>
                 {todayAtt.punchOut && (
-                  <div>Out: <strong style={{ color: '#1A1D2E' }}>{new Date(todayAtt.punchOut).toLocaleTimeString()}</strong></div>
+                  <div>Punch Out: <strong className="text-slate-800 font-semibold">{new Date(todayAtt.punchOut).toLocaleTimeString()}</strong></div>
                 )}
                 {todayAtt.totalHours > 0 && (
-                  <div style={{ marginTop: 4 }}>
-                    <span className="badge badge-blue">{todayAtt.totalHours}h worked</span>
+                  <div className="pt-2">
+                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                      {todayAtt.totalHours}h worked
+                    </span>
                   </div>
                 )}
               </div>
             )}
             {!todayAtt?.punchIn && (
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>Not punched in yet</p>
+              <p className="text-xs text-slate-400 font-medium mt-2">Not punched in yet today</p>
             )}
           </div>
         </div>
 
-        {/* Leave balance */}
-        <div className="card">
-          <div className="card-title">Leave Balances</div>
-          {leaveBalance.length === 0 ? (
-            <div className="empty-state" style={{ padding: '24px 0' }}>
-              <p>No leave data found</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {leaveBalance.map(b => (
-                <div key={b._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: b.leaveType?.color || '#6B7280' }} />
-                    <span style={{ fontSize: 13, fontWeight: 500 }}>{b.leaveType?.name}</span>
+        {/* Leave Balances Box */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-premium flex flex-col justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 tracking-tight font-heading border-b border-slate-100 pb-3">
+              Leave Balances
+            </h2>
+            {leaveBalance.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-sm text-slate-400 font-medium">No leave data found</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {leaveBalance.map(b => (
+                  <div key={b._id} className="flex justify-between items-center py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: b.leaveType?.color || '#6B7280' }} />
+                      <span className="text-sm font-semibold text-slate-700">{b.leaveType?.name}</span>
+                    </div>
+                    <div className="flex gap-3 items-center">
+                      <span className="text-xs text-slate-400 font-medium">{b.taken} used</span>
+                      <span className="inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-700/10">
+                        {b.balance} left
+                      </span>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span style={{ fontSize: 12, color: '#9CA3AF' }}>{b.taken} used</span>
-                    <span className="badge badge-blue">{b.balance} left</span>
-                  </div>
-                </div>
-              ))}
-              <Link to="/leave" style={{ marginTop: 8, fontSize: 13, color: '#3B5BDB', fontWeight: 600 }}>
-                Apply for leave →
-              </Link>
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="pt-4 border-t border-slate-100 mt-4">
+            <Link to="/leave" className="text-xs font-bold text-brand-600 hover:text-brand-800 transition-colors flex items-center gap-1">
+              Apply for leave →
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="card" style={{ marginTop: 20 }}>
-        <div className="card-title">Quick Actions</div>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <Link to="/leave" className="btn btn-secondary">📅 Apply Leave</Link>
-          <Link to="/attendance" className="btn btn-secondary">⏱ View Attendance</Link>
+      {/* Quick Actions Box */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-premium">
+        <h2 className="text-sm font-bold text-slate-900 tracking-tight font-heading border-b border-slate-100 pb-3 mb-4">
+          Quick Actions
+        </h2>
+        <div className="flex flex-wrap gap-3">
+          <Link to="/leave" className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 rounded-xl shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all">
+            📅 Apply Leave
+          </Link>
+          <Link to="/attendance" className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 rounded-xl shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all">
+            ⏱ View Attendance
+          </Link>
           {hasRole('manager', 'hr_admin') && (
-            <Link to="/approvals" className="btn btn-secondary">✅ Pending Approvals {pendingCount > 0 && `(${pendingCount})`}</Link>
+            <Link to="/approvals" className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 rounded-xl shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all">
+              ✅ Pending Approvals {pendingCount > 0 && `(${pendingCount})`}
+            </Link>
           )}
           {hasRole('hr_admin') && (
-            <Link to="/employees" className="btn btn-secondary">👥 Manage Employees</Link>
+            <Link to="/employees" className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 rounded-xl shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all">
+              👥 Manage Employees
+            </Link>
           )}
           {hasRole('hr_admin', 'manager') && (
-            <Link to="/ai-search" className="btn btn-secondary">🤖 AI Search</Link>
+            <Link to="/ai-search" className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 rounded-xl shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all">
+              🤖 AI Search
+            </Link>
           )}
         </div>
       </div>

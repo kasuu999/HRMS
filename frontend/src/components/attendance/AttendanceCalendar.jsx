@@ -1,14 +1,14 @@
 import React from 'react';
 
 const STATUS_COLOR = {
-  present: { bg: '#DCFCE7', color: '#15803D', label: 'P' },
-  absent: { bg: '#FEE2E2', color: '#DC2626', label: 'A' },
-  late: { bg: '#FEF9C3', color: '#A16207', label: 'L' },
-  half_day: { bg: '#DBEAFE', color: '#1D4ED8', label: 'H' },
-  on_leave: { bg: '#EDE9FE', color: '#6D28D9', label: 'LV' },
-  holiday: { bg: '#FEE2E2', color: '#9F1239', label: 'H' },
-  weekly_off: { bg: '#F3F4F6', color: '#6B7280', label: 'W' },
-  work_from_home: { bg: '#ECFDF5', color: '#065F46', label: 'WFH' },
+  present: { bg: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10', label: 'P' },
+  absent: { bg: 'bg-rose-50 text-rose-700 ring-rose-600/10', label: 'A' },
+  late: { bg: 'bg-amber-50 text-amber-850 ring-amber-600/20', label: 'L' },
+  half_day: { bg: 'bg-blue-50 text-blue-700 ring-blue-600/10', label: 'H' },
+  on_leave: { bg: 'bg-violet-50 text-violet-750 ring-violet-600/10', label: 'LV' },
+  holiday: { bg: 'bg-rose-50 text-rose-700 ring-rose-600/10', label: 'H' },
+  weekly_off: { bg: 'bg-slate-50 text-slate-600 ring-slate-500/10', label: 'W' },
+  work_from_home: { bg: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10', label: 'WFH' },
 };
 
 export default function AttendanceCalendar({ records = [], year, month }) {
@@ -34,26 +34,26 @@ export default function AttendanceCalendar({ records = [], year, month }) {
   };
 
   return (
-    <div>
+    <div className="space-y-5">
       {/* Stats row */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="flex flex-wrap gap-2">
         {Object.entries(stats).map(([key, val]) => {
-          const cfg = STATUS_COLOR[key] || {};
+          const cfg = STATUS_COLOR[key] || STATUS_COLOR.weekly_off;
           return (
-            <div key={key} style={{ background: cfg.bg, color: cfg.color, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
-              {key.replace('_', ' ').toUpperCase()}: {val}
+            <div key={key} className={`px-3 py-1.5 rounded-xl text-xs font-bold ring-1 ring-inset capitalize ${cfg.bg}`}>
+              {key.replace('_', ' ')}: {val}
             </div>
           );
         })}
       </div>
 
       {/* Calendar grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+      <div className="grid grid-cols-7 gap-1">
         {dayNames.map(d => (
-          <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', padding: '4px 0' }}>{d}</div>
+          <div key={d} className="text-center text-xs font-bold text-slate-450 py-2">{d}</div>
         ))}
 
-        {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} />)}
+        {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} className="p-2" />)}
 
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
           const rec = recordMap[day];
@@ -62,27 +62,38 @@ export default function AttendanceCalendar({ records = [], year, month }) {
           const isFuture = new Date(y, m, day) > new Date();
 
           return (
-            <div key={day} title={rec ? `${rec.status}${rec.isLate ? ` (${rec.lateMinutes}m late)` : ''}` : ''}
-              style={{
-                textAlign: 'center', padding: '6px 2px', borderRadius: 8, fontSize: 11, fontWeight: 600,
-                background: cfg ? cfg.bg : (isFuture ? 'transparent' : '#F9FAFB'),
-                color: cfg ? cfg.color : (isFuture ? 'var(--text-muted)' : 'var(--text-secondary)'),
-                border: isToday ? '2px solid var(--primary)' : '2px solid transparent',
-                cursor: rec ? 'pointer' : 'default',
-              }}>
-              <div style={{ fontSize: 12 }}>{day}</div>
-              {cfg && <div style={{ fontSize: 9, marginTop: 1 }}>{cfg.label}</div>}
+            <div 
+              key={day} 
+              title={rec ? `${rec.status}${rec.isLate ? ` (${rec.lateMinutes}m late)` : ''}` : ''}
+              className={`text-center py-2 px-1 rounded-xl text-xs font-semibold flex flex-col justify-between items-center h-12 ring-2 transition-all ${
+                isToday 
+                  ? 'ring-brand-500/80 bg-white text-brand-600' 
+                  : 'ring-transparent'
+              } ${
+                cfg 
+                  ? `${cfg.bg} cursor-pointer hover:opacity-90` 
+                  : isFuture 
+                    ? 'bg-transparent text-slate-400' 
+                    : 'bg-slate-50/70 text-slate-500'
+              }`}
+            >
+              <div className="text-xs">{day}</div>
+              {cfg ? (
+                <div className="text-[9px] font-bold tracking-tight opacity-90 mt-0.5">{cfg.label}</div>
+              ) : (
+                <div className="h-3.5" />
+              )}
             </div>
           );
         })}
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+      <div className="flex flex-wrap gap-x-5 gap-y-2 pt-3 border-t border-slate-100 mt-4">
         {Object.entries(STATUS_COLOR).slice(0, 5).map(([key, cfg]) => (
-          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11 }}>
-            <div style={{ width: 12, height: 12, borderRadius: 3, background: cfg.bg, border: `1px solid ${cfg.color}` }} />
-            <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{key.replace('_', ' ')}</span>
+          <div key={key} className="flex items-center gap-2 text-xs font-medium text-slate-500">
+            <div className={`w-3.5 h-3.5 rounded-lg ring-1 ring-inset ${cfg.bg}`} />
+            <span className="capitalize">{key.replace('_', ' ')}</span>
           </div>
         ))}
       </div>

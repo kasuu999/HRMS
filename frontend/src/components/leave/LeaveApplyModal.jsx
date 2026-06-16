@@ -40,29 +40,40 @@ export default function LeaveApplyModal({ onClose, onSuccess }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label className="form-label">Leave Type *</label>
-        <select className="form-input form-select" value={form.leaveTypeId}
-          onChange={e => setForm(p => ({ ...p, leaveTypeId: e.target.value }))} required>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Leave Type *</label>
+        <select 
+          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm" 
+          value={form.leaveTypeId}
+          onChange={e => setForm(p => ({ ...p, leaveTypeId: e.target.value }))} 
+          required
+        >
           <option value="">Select leave type</option>
           {leaveTypes.map(t => <option key={t._id} value={t._id}>{t.name} ({t.code})</option>)}
         </select>
         {selectedBalance && (
-          <div style={{ marginTop: 6, fontSize: 12 }}>
-            Available: <strong style={{ color: selectedBalance.balance > 0 ? '#15803D' : '#DC2626' }}>{selectedBalance.balance} days</strong>
+          <div className="text-xs text-slate-500 mt-1 font-medium">
+            Available: <strong className={selectedBalance.balance > 0 ? 'text-emerald-700' : 'text-rose-600'}>{selectedBalance.balance} days</strong>
             {' '} | Used: {selectedBalance.taken} days
           </div>
         )}
       </div>
 
-      <div className="form-group">
-        <label className="form-label">Day Type</label>
-        <div style={{ display: 'flex', gap: 8 }}>
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Day Type</label>
+        <div className="flex gap-2">
           {['full_day', 'half_day'].map(t => (
-            <button type="button" key={t}
-              className={`btn ${form.dayType === t ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-              onClick={() => setForm(p => ({ ...p, dayType: t }))}>
+            <button 
+              type="button" 
+              key={t}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                form.dayType === t 
+                  ? 'bg-brand-600 text-white shadow-sm font-bold' 
+                  : 'border border-slate-200 bg-white text-slate-605 text-slate-600 hover:bg-slate-50'
+              }`}
+              onClick={() => setForm(p => ({ ...p, dayType: t }))}
+            >
               {t === 'full_day' ? '☀️ Full Day' : '🌤 Half Day'}
             </button>
           ))}
@@ -70,10 +81,13 @@ export default function LeaveApplyModal({ onClose, onSuccess }) {
       </div>
 
       {form.dayType === 'half_day' && (
-        <div className="form-group">
-          <label className="form-label">Half Day Period</label>
-          <select className="form-input form-select" value={form.halfDayPeriod}
-            onChange={e => setForm(p => ({ ...p, halfDayPeriod: e.target.value }))}>
+        <div className="space-y-1.5 animate-in slide-in-from-top-1 duration-150">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Half Day Period</label>
+          <select 
+            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm" 
+            value={form.halfDayPeriod}
+            onChange={e => setForm(p => ({ ...p, halfDayPeriod: e.target.value }))}
+          >
             <option value="">Select</option>
             <option value="morning">Morning</option>
             <option value="afternoon">Afternoon</option>
@@ -81,38 +95,65 @@ export default function LeaveApplyModal({ onClose, onSuccess }) {
         </div>
       )}
 
-      <div className="grid-2">
-        <div className="form-group">
-          <label className="form-label">From Date *</label>
-          <input type="date" className="form-input" value={form.fromDate}
-            onChange={e => setForm(p => ({ ...p, fromDate: e.target.value, toDate: p.dayType === 'half_day' ? e.target.value : p.toDate }))} required />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">From Date *</label>
+          <input 
+            type="date" 
+            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-sm" 
+            value={form.fromDate}
+            onChange={e => setForm(p => ({ ...p, fromDate: e.target.value, toDate: p.dayType === 'half_day' ? e.target.value : p.toDate }))} 
+            required 
+          />
         </div>
-        <div className="form-group">
-          <label className="form-label">To Date *</label>
-          <input type="date" className="form-input" value={form.toDate}
-            min={form.fromDate} disabled={form.dayType === 'half_day'}
-            onChange={e => setForm(p => ({ ...p, toDate: e.target.value }))} required />
+        <div className="space-y-1.5">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">To Date *</label>
+          <input 
+            type="date" 
+            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-sm" 
+            value={form.toDate}
+            min={form.fromDate} 
+            disabled={form.dayType === 'half_day'}
+            onChange={e => setForm(p => ({ ...p, toDate: e.target.value }))} 
+            required 
+          />
         </div>
       </div>
 
       {days > 0 && (
-        <div style={{ background: 'var(--primary-light)', color: 'var(--primary)', padding: '8px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600, marginBottom: 16 }}>
-          📅 {days} working day{days !== 1 ? 's' : ''} requested
+        <div className="p-3 bg-brand-50/50 text-brand-700 ring-1 ring-brand-700/10 rounded-xl text-xs font-semibold flex items-center justify-between">
+          <span>📅 {days} working day{days !== 1 ? 's' : ''} requested</span>
           {selectedBalance && days > selectedBalance.balance && (
-            <span style={{ color: '#DC2626', marginLeft: 8 }}>⚠️ Insufficient balance</span>
+            <span className="text-rose-600 font-bold">⚠️ Insufficient balance</span>
           )}
         </div>
       )}
 
-      <div className="form-group">
-        <label className="form-label">Reason *</label>
-        <textarea className="form-input" rows={3} placeholder="Briefly explain the reason..."
-          value={form.reason} onChange={e => setForm(p => ({ ...p, reason: e.target.value }))} required />
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Reason *</label>
+        <textarea 
+          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-sm resize-none" 
+          rows={3} 
+          placeholder="Briefly explain the reason..."
+          value={form.reason} 
+          onChange={e => setForm(p => ({ ...p, reason: e.target.value }))} 
+          required 
+        />
       </div>
 
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-        <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
+      <div className="flex gap-2.5 justify-end pt-3 border-t border-slate-100 mt-4">
+        <button 
+          type="button" 
+          className="px-4 py-2 border border-slate-200 bg-white text-xs font-bold text-slate-655 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors" 
+          onClick={onClose}
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          className="px-4 py-2 bg-brand-605 bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white rounded-xl shadow-sm hover:shadow transition-colors disabled:opacity-50 disabled:pointer-events-none" 
+          disabled={loading}
+        >
           {loading ? <span className="spinner" /> : 'Submit Request'}
         </button>
       </div>

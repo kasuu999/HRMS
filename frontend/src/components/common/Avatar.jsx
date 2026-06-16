@@ -15,16 +15,25 @@ export default function Avatar({ name = '', photo, size = 'md', style: extraStyl
   const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
   if (photo) return (
-    <img src={photo} alt={name}
-      style={{ width: px, height: px, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, ...extraStyle }} />
+    <img 
+      src={photo} 
+      alt={name}
+      className="rounded-full object-cover shrink-0 shadow-sm border border-slate-100 hover:scale-105 transition-transform duration-200"
+      style={{ width: px, height: px, ...extraStyle }} 
+    />
   );
 
   return (
-    <div style={{
-      width: px, height: px, borderRadius: '50%', background: colorFor(name),
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#fff', fontWeight: 700, fontSize, flexShrink: 0, ...extraStyle
-    }}>
+    <div 
+      className="rounded-full flex items-center justify-center text-white font-bold shrink-0 shadow-sm border border-white hover:scale-105 transition-transform duration-200"
+      style={{
+        width: px,
+        height: px,
+        background: colorFor(name),
+        fontSize,
+        ...extraStyle
+      }}
+    >
       {initials || '?'}
     </div>
   );

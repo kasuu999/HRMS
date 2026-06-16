@@ -37,43 +37,40 @@ export default function HRChatbot() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(o => !o)}
-        style={{
-          position: 'fixed', bottom: 28, right: 28, width: 52, height: 52, borderRadius: '50%',
-          background: 'var(--primary)', color: '#fff', border: 'none', cursor: 'pointer',
-          fontSize: 22, boxShadow: '0 4px 20px rgba(59,91,219,0.4)', zIndex: 1000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s',
-        }}
+        className="fixed bottom-7 right-7 w-13 h-13 rounded-full bg-brand-600 text-white shadow-glow-strong hover:shadow-brand-300 hover:scale-110 active:scale-95 flex items-center justify-center text-xl transition-all duration-200 z-[1000] cursor-pointer"
         title="HR Assistant"
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
       >
         {open ? '✕' : '🤖'}
       </button>
 
       {/* Chat panel */}
       {open && (
-        <div style={{
-          position: 'fixed', bottom: 90, right: 28, width: 360, height: 480,
-          background: 'var(--bg-card)', borderRadius: 16, boxShadow: 'var(--shadow-md)',
-          display: 'flex', flexDirection: 'column', zIndex: 999, border: '1px solid var(--border)', overflow: 'hidden',
-        }}>
+        <div className="fixed bottom-22 right-7 w-88 h-[480px] bg-white rounded-2xl shadow-2xl flex flex-col z-[999] border border-slate-250/70 overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
           {/* Header */}
-          <div style={{ background: 'var(--primary)', color: '#fff', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 20 }}>🤖</span>
+          <div className="bg-brand-600 text-white p-4 flex items-center gap-3 shadow-sm">
+            <span className="text-xl">🤖</span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 14 }}>HR Assistant</div>
-              <div style={{ fontSize: 11, opacity: 0.8 }}>Powered by Claude AI</div>
+              <div className="font-extrabold text-sm font-heading tracking-wide">HR Assistant</div>
+              <div className="text-[10px] text-brand-200 font-semibold tracking-wide uppercase">AI Assistant</div>
             </div>
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/40 flex flex-col">
             {messages.map((m, i) => (
-              <div key={i} className={`chat-msg ${m.role === 'user' ? 'user' : 'bot'}`}
-                style={{ fontSize: 13, lineHeight: 1.6 }}>{m.content}</div>
+              <div 
+                key={i} 
+                className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
+                  m.role === 'user' 
+                    ? 'bg-brand-600 text-white self-end rounded-br-sm shadow-sm' 
+                    : 'bg-white text-slate-800 self-start rounded-bl-sm border border-slate-200/80 shadow-sm'
+                }`}
+              >
+                {m.content}
+              </div>
             ))}
             {loading && (
-              <div className="chat-msg bot" style={{ fontSize: 13 }}>
+              <div className="bg-white text-slate-800 self-start rounded-2xl rounded-bl-sm border border-slate-200/80 shadow-sm px-3.5 py-2.5 flex items-center justify-center">
                 <span className="spinner" style={{ width: 14, height: 14 }} />
               </div>
             )}
@@ -82,27 +79,34 @@ export default function HRChatbot() {
 
           {/* Quick replies */}
           {messages.length <= 1 && (
-            <div style={{ padding: '0 12px 8px', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <div className="px-4 pb-3 pt-1 bg-slate-50/40 flex flex-wrap gap-1.5">
               {QUICK.map(q => (
-                <button key={q} onClick={() => { setInput(q); }}
-                  style={{ fontSize: 11, padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)', background: 'var(--bg)', cursor: 'pointer', color: 'var(--primary)', fontWeight: 500 }}>
+                <button 
+                  key={q} 
+                  onClick={() => { setInput(q); }}
+                  className="text-[10px] px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-brand-600 hover:bg-slate-50 transition-colors font-semibold shadow-sm cursor-pointer"
+                >
                   {q}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Input */}
-          <div style={{ padding: '10px 12px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+          {/* Input Area */}
+          <div className="p-3 border-t border-slate-100 bg-white flex gap-2 items-center">
             <input
-              className="form-input" style={{ flex: 1, fontSize: 13, padding: '7px 10px' }}
+              className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all text-xs"
               placeholder="Ask anything about HR..."
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && send()}
             />
-            <button className="btn btn-primary btn-sm" onClick={send} disabled={loading || !input.trim()}>
-              ➤
+            <button 
+              className="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm hover:shadow transition-colors disabled:opacity-50 shrink-0" 
+              onClick={send} 
+              disabled={loading || !input.trim()}
+            >
+              Send ➤
             </button>
           </div>
         </div>

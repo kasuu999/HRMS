@@ -25,31 +25,31 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8F9FC' }}>
-      <div style={{ width: '100%', maxWidth: 400 }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <h1 style={{ fontFamily: 'Manrope', fontSize: 28, fontWeight: 800 }}>
-            HR<span style={{ color: '#818CF8' }}>MS</span> Pro
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="font-heading text-3xl font-black text-slate-900 tracking-tight">
+            HR<span className="text-brand-500">MS</span> Pro
           </h1>
-          <p style={{ color: '#6B7280', marginTop: 6, fontSize: 14 }}>Sign in to your organization</p>
+          <p className="text-slate-500 mt-2 text-sm font-medium">Sign in to your organization</p>
         </div>
 
-        <div className="card" style={{ padding: '28px 32px' }}>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Organization Slug</label>
+        <div className="bg-white rounded-2xl shadow-premium border border-slate-200/60 p-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Organization Slug</label>
               <input
-                className="form-input"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all placeholder:text-slate-400 text-sm"
                 placeholder="e.g. acme-corp"
                 value={form.tenantSlug}
                 onChange={e => setForm({ ...form, tenantSlug: e.target.value })}
                 required
               />
             </div>
-            <div className="form-group">
-              <label className="form-label">Email</label>
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Email</label>
               <input
-                className="form-input"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all placeholder:text-slate-400 text-sm"
                 type="email"
                 placeholder="you@company.com"
                 value={form.email}
@@ -57,10 +57,10 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Password</label>
               <input
-                className="form-input"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all placeholder:text-slate-400 text-sm"
                 type="password"
                 placeholder="••••••••"
                 value={form.password}
@@ -69,13 +69,17 @@ export default function LoginPage() {
               />
             </div>
 
-            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '10px' }} disabled={loading}>
+            <button 
+              type="submit"
+              className="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg focus:ring-4 focus:ring-brand-500/20 transition-all flex items-center justify-center text-sm disabled:opacity-70 disabled:pointer-events-none" 
+              disabled={loading}
+            >
               {loading ? <span className="spinner" /> : 'Sign In'}
             </button>
           </form>
 
-          <p style={{ marginTop: 20, textAlign: 'center', fontSize: 13, color: '#6B7280' }}>
-            New organization? <Link to="/register" style={{ color: '#3B5BDB', fontWeight: 600 }}>Register here</Link>
+          <p className="mt-6 text-center text-sm text-slate-500 font-medium">
+            New organization? <Link to="/register" className="text-brand-650 hover:text-brand-800 font-semibold transition-colors">Register here</Link>
           </p>
         </div>
       </div>

@@ -4,7 +4,6 @@ const User = require('./user.model');
 const Tenant = require('./tenant.model');
 const AuditLog = require('./auditLog.model');
 
-// Generate tokens
 const generateTokens = (userId, tenantId, role) => {
   const accessToken = jwt.sign(
     { userId, tenantId, role },
@@ -19,7 +18,6 @@ const generateTokens = (userId, tenantId, role) => {
   return { accessToken, refreshToken };
 };
 
-// Helper: log audit
 const audit = async (tenantId, userId, action, module, req, extra = {}) => {
   try {
     await AuditLog.create({
@@ -28,35 +26,57 @@ const audit = async (tenantId, userId, action, module, req, extra = {}) => {
       userAgent: req.headers['user-agent'],
       ...extra
     });
-  } catch (e) { /* non-blocking */ }
+  } catch (e) {}
 };
 
-// @POST /api/auth/register-tenant — Create new tenant + admin user
+// KEY FIX: Creates Employee record for admin on registration
 exports.registerTenant = async (req, res) => {
   try {
     const { companyName, adminEmail, adminPassword, adminName } = req.body;
 
-    // Check if tenant slug already exists
+    if (!companyName || !adminEmail || !adminPassword) {
+      return res.status(400).json({ success: false, message: 'companyName, adminEmail and adminPassword are required' });
+    }
+
     const slug = companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const existingTenant = await Tenant.findOne({ slug });
     if (existingTenant) {
       return res.status(409).json({ success: false, message: 'Company already registered' });
     }
 
-    // Create tenant
-    const tenant = await Tenant.create({
-      name: companyName,
-      slug,
-      adminEmail,
+    const tenant = await Tenant.create({ name: companyName, slug, adminEmail });
+
+    // Parse admin name
+    const nameParts = (adminName || adminEmail.split('@')[0]).split(' ');
+    const firstName = nameParts[0] || 'Admin';
+    const lastName = nameParts.slice(1).join(' ') || 'User';
+
+    // Create Employee record (needed for attendance/leave)
+    const Employee = require('../employee/employee.model');
+    const empCount = await Employee.countDocuments({ tenantId: tenant._id });
+    const employeeId = `EMP${String(empCount + 1).padStart(4, '0')}`;
+
+    const employee = await Employee.create({
+      tenantId: tenant._id,
+      employeeId,
+      firstName,
+      lastName,
+      officialEmail: adminEmail,
+      dateOfJoining: new Date(),
+      employmentType: 'full_time',
+      status: 'active',
     });
 
-    // Create admin user
     const user = await User.create({
       tenantId: tenant._id,
+      employeeId: employee._id,
       email: adminEmail,
       password: adminPassword,
       role: 'hr_admin',
     });
+
+    employee.userId = user._id;
+    await employee.save();
 
     const { accessToken, refreshToken } = generateTokens(user._id, tenant._id, user.role);
     user.refreshToken = refreshToken;
@@ -69,7 +89,7 @@ exports.registerTenant = async (req, res) => {
       message: 'Tenant registered successfully',
       data: {
         tenant: { id: tenant._id, name: tenant.name, slug: tenant.slug },
-        user: { id: user._id, email: user.email, role: user.role },
+        user: { id: user._id, email: user.email, role: user.role, tenantName: tenant.name },
         accessToken,
         refreshToken,
       }
@@ -79,36 +99,23 @@ exports.registerTenant = async (req, res) => {
   }
 };
 
-// @POST /api/auth/login
 exports.login = async (req, res) => {
   try {
     const { email, password, tenantSlug } = req.body;
 
-    // Find tenant
     const tenant = await Tenant.findOne({ slug: tenantSlug, isActive: true });
-    if (!tenant) {
-      return res.status(404).json({ success: false, message: 'Organization not found' });
-    }
+    if (!tenant) return res.status(404).json({ success: false, message: 'Organization not found' });
 
-    // Find user
     const user = await User.findOne({ tenantId: tenant._id, email: email.toLowerCase() })
       .select('+password +refreshToken +failedLoginAttempts +lockUntil');
+    if (!user) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
-    if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
-    }
-
-    // Check account lock
     if (user.isLocked) {
       const remaining = Math.ceil((user.lockUntil - Date.now()) / 60000);
       await audit(tenant._id, user._id, 'LOGIN_BLOCKED', 'auth', req, { status: 'failure' });
-      return res.status(423).json({
-        success: false,
-        message: `Account locked. Try again in ${remaining} minutes.`
-      });
+      return res.status(423).json({ success: false, message: `Account locked. Try again in ${remaining} minutes.` });
     }
 
-    // Verify password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       await user.incLoginAttempts();
@@ -116,7 +123,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Reset failed attempts
     if (user.failedLoginAttempts > 0) {
       await user.updateOne({ $set: { failedLoginAttempts: 0 }, $unset: { lockUntil: 1 } });
     }
@@ -131,13 +137,7 @@ exports.login = async (req, res) => {
     res.json({
       success: true,
       data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          role: user.role,
-          tenantId: tenant._id,
-          tenantName: tenant.name,
-        },
+        user: { id: user._id, email: user.email, role: user.role, tenantId: tenant._id, tenantName: tenant.name },
         accessToken,
         refreshToken,
       }
@@ -147,17 +147,13 @@ exports.login = async (req, res) => {
   }
 };
 
-// @POST /api/auth/refresh-token
 exports.refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    if (!refreshToken) {
-      return res.status(401).json({ success: false, message: 'Refresh token required' });
-    }
+    if (!refreshToken) return res.status(401).json({ success: false, message: 'Refresh token required' });
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const user = await User.findOne({ _id: decoded.userId, tenantId: decoded.tenantId })
-      .select('+refreshToken');
+    const user = await User.findOne({ _id: decoded.userId, tenantId: decoded.tenantId }).select('+refreshToken');
 
     if (!user || user.refreshToken !== refreshToken) {
       return res.status(401).json({ success: false, message: 'Invalid refresh token' });
@@ -173,7 +169,6 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-// @POST /api/auth/logout
 exports.logout = async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } });
@@ -184,7 +179,6 @@ exports.logout = async (req, res) => {
   }
 };
 
-// @POST /api/auth/forgot-password
 exports.forgotPassword = async (req, res) => {
   try {
     const { email, tenantSlug } = req.body;
@@ -192,16 +186,12 @@ exports.forgotPassword = async (req, res) => {
     if (!tenant) return res.status(404).json({ success: false, message: 'Organization not found' });
 
     const user = await User.findOne({ tenantId: tenant._id, email: email.toLowerCase() });
-    // Always return success to prevent email enumeration
     if (!user) return res.json({ success: true, message: 'If the email exists, a reset link has been sent.' });
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    user.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 30 min
+    user.passwordResetExpires = Date.now() + 30 * 60 * 1000;
     await user.save();
-
-    // TODO: Send email with reset link
-    // await sendResetEmail(email, resetToken, tenant.slug);
 
     await audit(tenant._id, user._id, 'FORGOT_PASSWORD', 'auth', req);
     res.json({ success: true, message: 'If the email exists, a reset link has been sent.' });
@@ -210,7 +200,6 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-// @GET /api/auth/me
 exports.getMe = async (req, res) => {
   res.json({ success: true, data: req.user });
 };

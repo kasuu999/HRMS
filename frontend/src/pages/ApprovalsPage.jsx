@@ -42,73 +42,103 @@ export default function ApprovalsPage() {
   };
 
   return (
-    <div>
-      <div className="page-header">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
         <div>
-          <h1 className="page-title">Approvals</h1>
-          <p className="page-subtitle">{data.totalPending} pending action{data.totalPending !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Approvals</h1>
+          <p className="text-xs text-slate-500 mt-1 font-medium">{data.totalPending} pending action{data.totalPending !== 1 ? 's' : ''}</p>
         </div>
-        <button className="btn btn-secondary" onClick={load}>🔄 Refresh</button>
+        <button 
+          className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 bg-white text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-50 transition-colors shadow-sm" 
+          onClick={load}
+        >
+          🔄 Refresh
+        </button>
       </div>
 
-      <div className="tabs" style={{ marginBottom: 20 }}>
-        <div className={`tab ${tab === 0 ? 'active' : ''}`} onClick={() => setTab(0)}>
-          Leave Requests {data.leaveRequests.length > 0 && <span className="badge badge-red" style={{ marginLeft: 6 }}>{data.leaveRequests.length}</span>}
+      {/* Tabs */}
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl">
+        <div 
+          className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center ${tab === 0 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
+          onClick={() => setTab(0)}
+        >
+          Leave Requests 
+          {data.leaveRequests.length > 0 && (
+            <span className="ml-2 inline-flex items-center rounded-full bg-rose-55 bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-700/10">
+              {data.leaveRequests.length}
+            </span>
+          )}
         </div>
-        <div className={`tab ${tab === 1 ? 'active' : ''}`} onClick={() => setTab(1)}>
-          Regularizations {data.regularizations.length > 0 && <span className="badge badge-yellow" style={{ marginLeft: 6 }}>{data.regularizations.length}</span>}
+        <div 
+          className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center ${tab === 1 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
+          onClick={() => setTab(1)}
+        >
+          Regularizations 
+          {data.regularizations.length > 0 && (
+            <span className="ml-2 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-inset ring-amber-600/15">
+              {data.regularizations.length}
+            </span>
+          )}
         </div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 60 }}><div className="spinner" style={{ margin: '0 auto' }} /></div>
+        <div className="flex justify-center items-center py-16">
+          <div className="spinner" />
+        </div>
       ) : (
-        <>
-          {/* Leave Approvals */}
+        <div className="space-y-4">
+          {/* Leave Approvals Tab */}
           {tab === 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className="space-y-4">
               {data.leaveRequests.length === 0 ? (
-                <div className="card">
-                  <div className="empty-state"><p>✅ No pending leave requests</p></div>
+                <div className="text-center py-16 border border-slate-200/60 rounded-2xl bg-white shadow-premium">
+                  <p className="text-slate-500 font-medium text-base">✅ No pending leave requests</p>
                 </div>
               ) : data.leaveRequests.map(r => (
-                <div key={r._id} className="card">
-                  <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <div key={r._id} className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-premium">
+                  <div className="flex flex-col md:flex-row gap-6 items-start">
                     <Avatar name={`${r.employeeId?.firstName} ${r.employeeId?.lastName}`} photo={r.employeeId?.photo} size="md" />
-                    <div style={{ flex: 1, minWidth: 200 }}>
-                      <div style={{ fontWeight: 700, fontSize: 15 }}>{r.employeeId?.firstName} {r.employeeId?.lastName}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{r.employeeId?.employeeId}</div>
-                      <div style={{ marginTop: 8, display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 13 }}>
-                        <span>
-                          <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: r.leaveType?.color, marginRight: 5 }} />
-                          <strong>{r.leaveType?.name}</strong>
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <div className="font-extrabold text-sm text-slate-800 tracking-tight font-heading">{r.employeeId?.firstName} {r.employeeId?.lastName}</div>
+                      <div className="text-xs text-slate-400 font-semibold">{r.employeeId?.employeeId}</div>
+                      <div className="pt-2 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold text-slate-650">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.leaveType?.color }} />
+                          {r.leaveType?.name}
                         </span>
                         <span>📅 {new Date(r.fromDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} → {new Date(r.toDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
-                        <span><strong>{r.days} day{r.days !== 1 ? 's' : ''}</strong></span>
+                        <span>⏱ {r.days} day{r.days !== 1 ? 's' : ''}</span>
                         {r.isLOP && <Badge status="lop" label="LOP" color="red" />}
                       </div>
-                      <div style={{ marginTop: 6, fontSize: 13, color: 'var(--text-secondary)', fontStyle: 'italic' }}>"{r.reason}"</div>
-                      <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>
+                      <div className="text-xs text-slate-500 font-medium italic pt-1">"{r.reason}"</div>
+                      <div className="text-[10px] text-slate-400 font-medium pt-1">
                         Applied {new Date(r.createdAt).toLocaleDateString()}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 220 }}>
+                    <div className="w-full md:w-60 flex flex-col gap-2 shrink-0">
                       <textarea
-                        className="form-input" rows={2} placeholder="Comment (optional)..."
-                        style={{ fontSize: 12 }}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-850 transition-all placeholder:text-slate-400 text-xs resize-none"
+                        rows={2} 
+                        placeholder="Comment (optional)..."
                         value={comment[r._id] || ''}
                         onChange={e => setComment(p => ({ ...p, [r._id]: e.target.value }))}
                       />
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button className="btn btn-success" style={{ flex: 1, justifyContent: 'center' }}
+                      <div className="flex gap-2">
+                        <button 
+                          className="flex-1 justify-center py-2 px-3 bg-emerald-600 hover:bg-emerald-750 text-white rounded-xl text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:pointer-events-none"
                           disabled={actionLoading === r._id + 'approve'}
-                          onClick={() => handleLeave(r._id, 'approve')}>
-                          {actionLoading === r._id + 'approve' ? <span className="spinner" /> : '✅ Approve'}
+                          onClick={() => handleLeave(r._id, 'approve')}
+                        >
+                          {actionLoading === r._id + 'approve' ? <span className="spinner" /> : 'Approve'}
                         </button>
-                        <button className="btn btn-danger" style={{ flex: 1, justifyContent: 'center' }}
+                        <button 
+                          className="flex-1 justify-center py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:pointer-events-none"
                           disabled={actionLoading === r._id + 'reject'}
-                          onClick={() => handleLeave(r._id, 'reject')}>
-                          {actionLoading === r._id + 'reject' ? <span className="spinner" /> : '❌ Reject'}
+                          onClick={() => handleLeave(r._id, 'reject')}
+                        >
+                          {actionLoading === r._id + 'reject' ? <span className="spinner" /> : 'Reject'}
                         </button>
                       </div>
                     </div>
@@ -118,42 +148,49 @@ export default function ApprovalsPage() {
             </div>
           )}
 
-          {/* Regularization Approvals */}
+          {/* Regularization Approvals Tab */}
           {tab === 1 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className="space-y-4">
               {data.regularizations.length === 0 ? (
-                <div className="card">
-                  <div className="empty-state"><p>✅ No pending regularizations</p></div>
+                <div className="text-center py-16 border border-slate-200/60 rounded-2xl bg-white shadow-premium">
+                  <p className="text-slate-500 font-medium text-base">✅ No pending regularizations</p>
                 </div>
               ) : data.regularizations.map(r => (
-                <div key={r._id} className="card">
-                  <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <div key={r._id} className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-premium">
+                  <div className="flex flex-col md:flex-row gap-6 items-start">
                     <Avatar name={`${r.employeeId?.firstName} ${r.employeeId?.lastName}`} size="md" />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: 15 }}>{r.employeeId?.firstName} {r.employeeId?.lastName}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{r.employeeId?.employeeId}</div>
-                      <div style={{ display: 'flex', gap: 16, fontSize: 13, flexWrap: 'wrap' }}>
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <div className="font-extrabold text-sm text-slate-800 tracking-tight font-heading">{r.employeeId?.firstName} {r.employeeId?.lastName}</div>
+                      <div className="text-xs text-slate-400 font-semibold">{r.employeeId?.employeeId}</div>
+                      <div className="pt-2 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold text-slate-650">
                         <span>📅 {new Date(r.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                         {r.requestedPunchIn && <span>⏵ In: <strong>{new Date(r.requestedPunchIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>}
                         {r.requestedPunchOut && <span>⏹ Out: <strong>{new Date(r.requestedPunchOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>}
                       </div>
-                      <div style={{ marginTop: 6, fontSize: 13, color: 'var(--text-secondary)', fontStyle: 'italic' }}>"{r.reason}"</div>
+                      <div className="text-xs text-slate-500 font-medium italic pt-1">"{r.reason}"</div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 220 }}>
-                      <textarea className="form-input" rows={2} placeholder="Comment (optional)..."
-                        style={{ fontSize: 12 }}
+                    <div className="w-full md:w-60 flex flex-col gap-2 shrink-0">
+                      <textarea 
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-850 transition-all placeholder:text-slate-400 text-xs resize-none" 
+                        rows={2} 
+                        placeholder="Comment (optional)..."
                         value={comment[r._id] || ''}
-                        onChange={e => setComment(p => ({ ...p, [r._id]: e.target.value }))} />
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button className="btn btn-success" style={{ flex: 1, justifyContent: 'center' }}
+                        onChange={e => setComment(p => ({ ...p, [r._id]: e.target.value }))} 
+                      />
+                      <div className="flex gap-2">
+                        <button 
+                          className="flex-1 justify-center py-2 px-3 bg-emerald-600 hover:bg-emerald-750 text-white rounded-xl text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:pointer-events-none"
                           disabled={actionLoading === r._id + 'approve'}
-                          onClick={() => handleRegularize(r._id, 'approve')}>
-                          {actionLoading === r._id + 'approve' ? <span className="spinner" /> : '✅ Approve'}
+                          onClick={() => handleRegularize(r._id, 'approve')}
+                        >
+                          {actionLoading === r._id + 'approve' ? <span className="spinner" /> : 'Approve'}
                         </button>
-                        <button className="btn btn-danger" style={{ flex: 1, justifyContent: 'center' }}
+                        <button 
+                          className="flex-1 justify-center py-2 px-3 bg-rose-600 hover:bg-rose-750 text-white rounded-xl text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:pointer-events-none"
                           disabled={actionLoading === r._id + 'reject'}
-                          onClick={() => handleRegularize(r._id, 'reject')}>
-                          {actionLoading === r._id + 'reject' ? <span className="spinner" /> : '❌ Reject'}
+                          onClick={() => handleRegularize(r._id, 'reject')}
+                        >
+                          {actionLoading === r._id + 'reject' ? <span className="spinner" /> : 'Reject'}
                         </button>
                       </div>
                     </div>
@@ -162,7 +199,7 @@ export default function ApprovalsPage() {
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

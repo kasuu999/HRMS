@@ -48,28 +48,39 @@ export default function Layout() {
   };
 
   return (
-    <div className="layout">
-      <aside className="sidebar">
-        <div className="sidebar-logo">
-          HR<span>MS</span> Pro
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-slate-900 text-slate-100 flex flex-col fixed inset-y-0 left-0 border-r border-slate-800 z-50 shadow-lg">
+        {/* Sidebar Header/Logo */}
+        <div className="px-6 py-5.5 text-xl font-extrabold font-heading tracking-tight flex items-center gap-2 border-b border-slate-850">
+          <span className="text-white">HR</span>
+          <span className="text-brand-400">MS</span>
+          <span className="text-slate-400 font-medium text-sm ml-1 px-1.5 py-0.5 rounded bg-slate-800/80">Pro</span>
         </div>
 
-        <nav className="sidebar-nav">
+        {/* Sidebar Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
           {NAV.map(section => {
             const visibleItems = section.items.filter(item =>
               !item.roles || hasRole(...item.roles)
             );
             if (!visibleItems.length) return null;
             return (
-              <div key={section.section}>
-                <div className="nav-section-label">{section.section}</div>
+              <div key={section.section} className="space-y-1">
+                <div className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                  {section.section}
+                </div>
                 {visibleItems.map(item => (
                   <NavLink
                     key={item.to}
                     to={item.to}
-                    className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                      isActive 
+                        ? 'bg-brand-500/10 text-brand-400 font-semibold' 
+                        : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100'
+                    }`}
                   >
-                    <span>{item.icon}</span>
+                    <span className="text-base leading-none opacity-80">{item.icon}</span>
                     {item.label}
                   </NavLink>
                 ))}
@@ -78,37 +89,45 @@ export default function Layout() {
           })}
         </nav>
 
-        <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        {/* User profile & Logout footer */}
+        <div className="p-4 border-t border-slate-850 bg-slate-950/30">
+          <div className="flex items-center gap-3 mb-3.5">
             <div
-              className="avatar avatar-sm"
-              style={{ background: roleColors[user?.role] || '#6B7280', color: '#fff' }}
+              className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm text-white shadow-sm ring-1 ring-white/10"
+              style={{ background: roleColors[user?.role] || '#6B7280' }}
             >
               {user?.email?.[0]?.toUpperCase()}
             </div>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#E5E7EB' }}>{user?.email?.split('@')[0]}</div>
-              <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'capitalize' }}>{user?.role?.replace('_', ' ')}</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-slate-200 truncate">{user?.email?.split('@')[0]}</div>
+              <div className="text-[10px] text-slate-400 capitalize tracking-wide">{user?.role?.replace('_', ' ')}</div>
             </div>
           </div>
-          <button className="btn btn-ghost btn-sm" style={{ width: '100%', color: '#9CA3AF' }} onClick={handleLogout}>
-            Sign out
+          <button 
+            className="w-full py-2 px-3 bg-slate-800 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/50 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-300 transition-all duration-250 flex items-center justify-center gap-1.5" 
+            onClick={handleLogout}
+          >
+            🚪 Sign out
           </button>
         </div>
       </aside>
 
-      <div className="main-content">
-        <header className="header">
-          <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-secondary)' }}>
-            {user?.tenantName || 'HRMS'}
+      {/* Main Content Pane */}
+      <div className="pl-64 flex-1 flex flex-col min-h-screen">
+        {/* Header */}
+        <header className="h-16 bg-white/85 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-40 px-8 flex justify-between items-center shadow-sm">
+          <div className="font-extrabold text-sm text-slate-700 tracking-tight flex items-center gap-1.5">
+            🏢 {user?.tenantName || 'HRMS'}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 12, background: 'var(--primary-light)', color: 'var(--primary)', padding: '4px 10px', borderRadius: 20, fontWeight: 600, textTransform: 'capitalize' }}>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] bg-brand-50 text-brand-700 ring-1 ring-brand-700/10 px-2.5 py-0.5 rounded-full font-semibold capitalize tracking-wide">
               {user?.role?.replace('_', ' ')}
             </span>
           </div>
         </header>
-        <main className="page-body">
+
+        {/* Page Body */}
+        <main className="px-8 py-8 flex-1 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
       </div>
