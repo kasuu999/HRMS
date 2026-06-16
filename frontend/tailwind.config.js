@@ -1,8 +1,7 @@
+// tailwind.config.js – ESM format
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+export default {
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -19,7 +18,7 @@ module.exports = {
           900: '#4c1d95',
           950: '#2e1065',
         },
-        darkbg: '#0b0f19', // Modern developer dashboard slate-dark
+        darkbg: '#0b0f19',
         darkcard: '#151b2c',
         darkborder: '#1f293d',
       },
@@ -32,8 +31,8 @@ module.exports = {
         'premium-hover': '0 20px 40px -15px rgba(0, 0, 0, 0.08), 0 1px 5px rgba(0, 0, 0, 0.03)',
         glow: '0 0 20px rgba(139, 92, 246, 0.15)',
         'glow-strong': '0 0 25px rgba(139, 92, 246, 0.3)',
-      }
+      },
     },
   },
   plugins: [],
-}
+};
