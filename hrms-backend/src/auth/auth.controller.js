@@ -99,6 +99,87 @@ exports.registerTenant = async (req, res) => {
   }
 };
 
+// Employee self-registration: join existing tenant
+exports.registerEmployee = async (req, res) => {
+  try {
+    const { tenantSlug, firstName, lastName, email, password, phone } = req.body;
+
+    if (!tenantSlug || !email || !password || !firstName || !lastName) {
+      return res.status(400).json({ success: false, message: 'tenantSlug, firstName, lastName, email and password are required' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+    }
+
+    const tenant = await Tenant.findOne({ slug: tenantSlug, isActive: true });
+    if (!tenant) return res.status(404).json({ success: false, message: 'Organization not found. Check the slug and try again.' });
+
+    // Check if email already exists in this tenant
+    const existingUser = await User.findOne({ tenantId: tenant._id, email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: 'Email already registered in this organization' });
+    }
+
+    // Create Employee record
+    const Employee = require('../employee/employee.model');
+    const empCount = await Employee.countDocuments({ tenantId: tenant._id });
+    const employeeIdStr = `EMP${String(empCount + 1).padStart(4, '0')}`;
+
+    const employee = await Employee.create({
+      tenantId: tenant._id,
+      employeeId: employeeIdStr,
+      firstName,
+      lastName,
+      officialEmail: email,
+      phone: phone || undefined,
+      dateOfJoining: new Date(),
+      employmentType: 'full_time',
+      status: 'active',
+    });
+
+    // Create User with 'employee' role
+    const user = await User.create({
+      tenantId: tenant._id,
+      employeeId: employee._id,
+      email: email.toLowerCase(),
+      password,
+      role: 'employee',
+    });
+
+    employee.userId = user._id;
+    await employee.save();
+
+    const { accessToken, refreshToken } = generateTokens(user._id, tenant._id, user.role);
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    await audit(tenant._id, user._id, 'REGISTER_EMPLOYEE', 'auth', req, { status: 'success' });
+
+    // Send welcome notification
+    try {
+      const { createNotification } = require('../notifications/notification.service');
+      await createNotification({
+        tenantId: tenant._id, userId: user._id,
+        title: 'Welcome to ' + tenant.name + '! 🎉',
+        message: `Hi ${firstName}, your account has been created successfully. You can now mark attendance, apply for leave, and more.`,
+        type: 'success', module: 'auth',
+      });
+    } catch (e) {}
+
+    res.status(201).json({
+      success: true,
+      message: 'Employee registered successfully',
+      data: {
+        user: { id: user._id, email: user.email, role: user.role, tenantId: tenant._id, tenantName: tenant.name },
+        accessToken,
+        refreshToken,
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
     const { email, password, tenantSlug } = req.body;
@@ -201,5 +282,14 @@ exports.forgotPassword = async (req, res) => {
 };
 
 exports.getMe = async (req, res) => {
-  res.json({ success: true, data: req.user });
+  try {
+    const Tenant = require('./tenant.model');
+    const tenant = await Tenant.findById(req.user.tenantId).select('name slug');
+    const userData = req.user.toObject ? req.user.toObject() : { ...req.user };
+    userData.tenantName = tenant?.name || '';
+    userData.tenantSlug = tenant?.slug || '';
+    res.json({ success: true, data: userData });
+  } catch (err) {
+    res.json({ success: true, data: req.user });
+  }
 };

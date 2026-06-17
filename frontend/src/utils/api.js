@@ -52,6 +52,7 @@ api.interceptors.response.use(
 
 export const authAPI = {
   register: (form) => api.post('/auth/register-tenant', form),
+  registerEmployee: (form) => api.post('/auth/register-employee', form),
   login: (form) => api.post('/auth/login', form),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
@@ -86,6 +87,12 @@ export const leaveAPI = {
 
 export const workflowAPI = {
   pending: () => api.get('/workflow/pending'),
+};
+
+export const notificationAPI = {
+  list: (params) => api.get('/notifications', { params }),
+  markRead: (id) => api.put(`/notifications/${id}/read`),
+  markAllRead: () => api.put('/notifications/mark-all-read'),
 };
 
 export const reportAPI = {

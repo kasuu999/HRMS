@@ -8,7 +8,7 @@ router.use(authenticate);
 router.get('/pending', async (req, res) => {
   try {
     const { LeaveRequest } = require('../leave/leave.model');
-    const { RegularizationRequest } = require('../attendance/attendance.model');
+    const { RegularizationRequest } = require('../modules/attendance/attendance.model');
     const Employee = require('../employee/employee.model');
 
     const tenantId = req.tenantId;

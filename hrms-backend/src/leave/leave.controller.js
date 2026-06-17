@@ -1,6 +1,7 @@
 const { LeaveType, LeaveBalance, LeaveRequest } = require('./leave.model');
 const Employee = require('../employee/employee.model');
 const { Attendance } = require('../modules/attendance/attendance.model');
+const { createNotification, getUserIdByEmployeeId } = require('../notifications/notification.service');
 
 // Calculate business days between two dates (excluding weekends)
 const calcBusinessDays = (from, to) => {
@@ -169,6 +170,52 @@ exports.applyLeave = async (req, res) => {
       await balance.save();
     }
 
+    // Notify employee their leave was submitted
+    const empUserId = await getUserIdByEmployeeId(employeeId);
+    if (empUserId) {
+      await createNotification({
+        tenantId, userId: empUserId,
+        title: 'Leave Request Submitted',
+        message: `Your ${leaveType.name} request for ${days} day(s) has been submitted and is pending approval.`,
+        type: 'info', module: 'leave', resourceId: request._id,
+      });
+    }
+
+    // Notify approver (reporting manager)
+    const emp = employee || await Employee.findById(employeeId);
+    const notificationMessage = `${emp.firstName} ${emp.lastName} has applied for ${leaveType.name} (${days} day(s)). Please review.`;
+    let approverUserIdStr = null;
+
+    if (approvers.length > 0) {
+      const approverUserId = await getUserIdByEmployeeId(approvers[0].employeeId);
+      if (approverUserId) {
+        approverUserIdStr = approverUserId.toString();
+        await createNotification({
+          tenantId, userId: approverUserId,
+          title: 'New Leave Request',
+          message: notificationMessage,
+          type: 'warning', module: 'leave', resourceId: request._id,
+        });
+      }
+    }
+
+    // Notify HR Admins
+    const User = require('../auth/user.model');
+    const hrAdmins = await User.find({ tenantId, role: 'hr_admin' });
+    for (const hr of hrAdmins) {
+      // Don't send duplicate notification if HR is the reporting manager
+      if (approverUserIdStr && hr._id.toString() === approverUserIdStr) continue;
+      // Don't notify the employee themselves if they are an HR admin applying
+      if (hr._id.toString() === req.user._id.toString()) continue;
+
+      await createNotification({
+        tenantId, userId: hr._id,
+        title: 'New Leave Request',
+        message: notificationMessage,
+        type: 'warning', module: 'leave', resourceId: request._id,
+      });
+    }
+
     res.status(201).json({ success: true, message: 'Leave request submitted', data: request });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -242,6 +289,20 @@ exports.handleLeaveRequest = async (req, res) => {
 
     await request.save();
 
+    // Notify the employee about the decision
+    const empUserId = await getUserIdByEmployeeId(request.employeeId);
+    if (empUserId) {
+      await createNotification({
+        tenantId, userId: empUserId,
+        title: isApproved ? 'Leave Approved ✅' : 'Leave Rejected ❌',
+        message: isApproved
+          ? `Your leave request has been approved.${comment ? ' Comment: ' + comment : ''}`
+          : `Your leave request has been rejected.${comment ? ' Reason: ' + comment : ''}`,
+        type: isApproved ? 'success' : 'error',
+        module: 'leave', resourceId: request._id,
+      });
+    }
+
     // Update leave balance
     const year = new Date(request.fromDate).getFullYear();
     const balance = await LeaveBalance.findOne({
@@ -298,6 +359,17 @@ exports.cancelLeave = async (req, res) => {
     request.status = 'cancelled';
     request.cancellationReason = reason;
     await request.save();
+
+    // Notify employee about cancellation confirmation
+    const empUserId = await getUserIdByEmployeeId(request.employeeId);
+    if (empUserId) {
+      await createNotification({
+        tenantId: req.tenantId, userId: empUserId,
+        title: 'Leave Cancelled',
+        message: `Your leave request has been cancelled.${reason ? ' Reason: ' + reason : ''}`,
+        type: 'info', module: 'leave', resourceId: request._id,
+      });
+    }
 
     // Restore balance
     const year = new Date(request.fromDate).getFullYear();

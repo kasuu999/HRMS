@@ -1,6 +1,7 @@
 const { Attendance, Shift, RegularizationRequest } = require('./attendance.model');
 const Employee = require('../../employee/employee.model');
 const User = require('../../auth/user.model');
+const { createNotification, getUserIdByEmployeeId } = require('../../notifications/notification.service');
 
 // Helper: get employee for current user, auto-create if missing (for admins without employee profile)
 const getOrCreateEmployee = async (req) => {
@@ -235,6 +236,19 @@ exports.requestRegularization = async (req, res) => {
       approver: employee.reportingManager,
     });
 
+    // Notify the approver (reporting manager)
+    if (employee.reportingManager) {
+      const approverUserId = await getUserIdByEmployeeId(employee.reportingManager);
+      if (approverUserId) {
+        await createNotification({
+          tenantId: req.tenantId, userId: approverUserId,
+          title: 'Regularization Request',
+          message: `${employee.firstName} ${employee.lastName} has submitted an attendance regularization request. Please review.`,
+          type: 'warning', module: 'attendance', resourceId: req_obj._id,
+        });
+      }
+    }
+
     res.status(201).json({ success: true, message: 'Regularization request submitted', data: req_obj });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -254,6 +268,21 @@ exports.handleRegularization = async (req, res) => {
     request.approverComment = comment;
     request.approvedAt = new Date();
     await request.save();
+
+    // Notify the employee about the decision
+    const empUserId = await getUserIdByEmployeeId(request.employeeId);
+    const isApproved = action === 'approve';
+    if (empUserId) {
+      await createNotification({
+        tenantId: req.tenantId, userId: empUserId,
+        title: isApproved ? 'Regularization Approved ✅' : 'Regularization Rejected ❌',
+        message: isApproved
+          ? `Your attendance regularization request has been approved.${comment ? ' Comment: ' + comment : ''}`
+          : `Your attendance regularization request has been rejected.${comment ? ' Reason: ' + comment : ''}`,
+        type: isApproved ? 'success' : 'error',
+        module: 'attendance', resourceId: request._id,
+      });
+    }
 
     if (action === 'approve') {
       // Update the attendance record
