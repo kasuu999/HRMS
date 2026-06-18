@@ -71,7 +71,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl">
+      <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-2xl">
         {['Headcount', 'Attendance', 'Leave Utilization'].map((t, i) => (
           <div 
             key={t} 

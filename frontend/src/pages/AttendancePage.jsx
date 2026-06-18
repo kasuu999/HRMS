@@ -51,14 +51,14 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
+      {/* Page Header /* Responsive Change: stack on mobile */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-4 border-b border-slate-200/50">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Attendance</h1>
           <p className="text-xs text-slate-500 mt-1 font-medium">Track your daily attendance and view history</p>
         </div>
         <button 
-          className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 bg-white text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm" 
+          className="inline-flex justify-center w-full sm:w-auto items-center gap-1.5 px-4 py-2 border border-slate-200 bg-white text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm" 
           onClick={() => setShowRegularize(true)}
         >
           📝 Request Regularization

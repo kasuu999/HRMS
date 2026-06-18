@@ -40,8 +40,8 @@ export default function Table({ columns, data, loading, pagination, onPageChange
         </table>
       </div>
       {pagination && pagination.pages > 1 && (
-        <div className="flex justify-between items-center px-4 py-2 text-sm">
-          <span className="text-slate-500">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-center gap-3 px-4 py-2 text-sm">
+          <span className="text-slate-500 text-center sm:text-left">
             Showing <strong className="font-semibold text-slate-700">{((pagination.page - 1) * 20) + 1}</strong>–
             <strong className="font-semibold text-slate-700">{Math.min(pagination.page * 20, pagination.total)}</strong> of{" "}
             <strong className="font-semibold text-slate-700">{pagination.total}</strong>

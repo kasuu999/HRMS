@@ -66,15 +66,15 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
+      {/* Page Header /* Responsive Change: stack on mobile */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-4 border-b border-slate-200/50">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Employees</h1>
           <p className="text-xs text-slate-500 mt-1 font-medium">{pagination.total || 0} total employees</p>
         </div>
         {hasRole('hr_admin') && (
           <button 
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white rounded-xl shadow-md transition-all hover:shadow-lg" 
+            className="inline-flex justify-center w-full sm:w-auto items-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white rounded-xl shadow-md transition-all hover:shadow-lg" 
             onClick={() => setShowForm(true)}
           >
             ➕ Add Employee
@@ -84,15 +84,15 @@ export default function EmployeesPage() {
 
       {/* Filters bar */}
       <div className="bg-white border border-slate-200/60 p-4 rounded-2xl shadow-premium">
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-center">
           <input
-            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all placeholder:text-slate-400 text-sm flex-1 min-w-[220px] max-w-xs"
+            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all placeholder:text-slate-400 text-sm flex-1 min-w-[220px] max-w-full sm:max-w-xs"
             placeholder="🔍 Search by name, ID, email..."
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
           />
           <select 
-            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm w-44"
+            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm w-full sm:w-44"
             value={filters.department} 
             onChange={e => { setFilters(f => ({ ...f, department: e.target.value })); setPage(1); }}
           >
@@ -100,7 +100,7 @@ export default function EmployeesPage() {
             {depts.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
           </select>
           <select 
-            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm w-40"
+            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm w-full sm:w-40"
             value={filters.status} 
             onChange={e => { setFilters(f => ({ ...f, status: e.target.value })); setPage(1); }}
           >
@@ -110,7 +110,7 @@ export default function EmployeesPage() {
             <option value="resigned">Resigned</option>
           </select>
           <select 
-            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm w-40"
+            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm w-full sm:w-40"
             value={filters.employmentType} 
             onChange={e => { setFilters(f => ({ ...f, employmentType: e.target.value })); setPage(1); }}
           >
@@ -122,7 +122,7 @@ export default function EmployeesPage() {
             <option value="probation">Probation</option>
           </select>
           
-          <div className="flex gap-0.5 bg-slate-100 p-0.5 rounded-xl ml-auto">
+          <div className="flex gap-0.5 bg-slate-100 p-0.5 rounded-xl self-start sm:self-auto sm:ml-auto">
             <div 
               className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${viewMode === 'table' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-650 hover:text-slate-905'}`} 
               onClick={() => setViewMode('table')}

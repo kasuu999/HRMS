@@ -35,14 +35,14 @@ export default function LeavePage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
+      {/* Page Header /* Responsive Change: stack on mobile */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-4 border-b border-slate-200/50">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Leave Management</h1>
           <p className="text-xs text-slate-500 mt-1 font-medium">Apply for leave and track your requests</p>
         </div>
         <button 
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white rounded-xl shadow-md transition-all hover:shadow-lg" 
+          className="inline-flex justify-center w-full sm:w-auto items-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white rounded-xl shadow-md transition-all hover:shadow-lg" 
           onClick={() => setShowApply(true)}
         >
           ➕ Apply Leave
@@ -85,23 +85,23 @@ export default function LeavePage() {
 
       {/* Requests panel */}
       <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-premium">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 flex-wrap gap-4">
-          <div className="flex gap-0.5 bg-slate-100 p-0.5 rounded-xl">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-stretch sm:items-center px-4 sm:px-6 py-4 border-b border-slate-100 gap-4">
+          <div className="flex gap-0.5 bg-slate-100 p-0.5 rounded-xl self-start sm:self-auto overflow-x-auto w-full sm:w-auto">
             <div 
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${tab === 0 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap ${tab === 0 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
               onClick={() => setTab(0)}
             >
               All Requests
             </div>
             <div 
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${tab === 1 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap ${tab === 1 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
               onClick={() => setTab(1)}
             >
               Pending
             </div>
           </div>
           <select 
-            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm w-40"
+            className="px-4 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 bg-white transition-all text-sm w-full sm:w-40"
             value={filterStatus} 
             onChange={e => { setFilterStatus(e.target.value); setLoading(true); }}
           >

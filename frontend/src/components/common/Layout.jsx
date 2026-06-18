@@ -62,6 +62,10 @@ export default function Layout() {
   const { user, logout, hasRole } = useAuthStore();
   const navigate = useNavigate();
 
+  // Responsive state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+
   // ── Notification state ──
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -125,13 +129,27 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
+      {/* Mobile Sidebar Overlay /* Responsive Change */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-slate-100 flex flex-col fixed inset-y-0 left-0 border-r border-slate-800 z-50 shadow-lg">
+      <aside className={`w-64 bg-slate-900 text-slate-100 flex flex-col fixed inset-y-0 left-0 border-r border-slate-800 z-50 shadow-lg transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         {/* Sidebar Header/Logo */}
-        <div className="px-6 py-5.5 text-xl font-extrabold font-heading tracking-tight flex items-center gap-2 border-b border-slate-850">
-          <span className="text-white">HR</span>
-          <span className="text-brand-400">MS</span>
-          <span className="text-slate-400 font-medium text-sm ml-1 px-1.5 py-0.5 rounded bg-slate-800/80">Pro</span>
+        <div className="px-6 py-5.5 text-xl font-extrabold font-heading tracking-tight flex items-center justify-between border-b border-slate-850">
+          <div className="flex items-center gap-2">
+            <span className="text-white">HR</span>
+            <span className="text-brand-400">MS</span>
+            <span className="text-slate-400 font-medium text-sm ml-1 px-1.5 py-0.5 rounded bg-slate-800/80">Pro</span>
+          </div>
+          {/* Close Sidebar Button for Mobile /* Responsive Change */}
+          <button className="lg:hidden text-slate-400 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
+            ✕
+          </button>
         </div>
 
         {/* Sidebar Navigation */}
@@ -157,6 +175,7 @@ export default function Layout() {
                         ? 'bg-brand-500/10 text-brand-400 font-semibold' 
                         : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100'
                     }`}
+                    onClick={() => setIsSidebarOpen(false)} /* Responsive Change: Close sidebar on mobile nav click */
                   >
                     <span className="text-base leading-none opacity-80">{item.icon}</span>
                     {item.label}
@@ -191,11 +210,21 @@ export default function Layout() {
       </aside>
 
       {/* Main Content Pane */}
-      <div className="pl-64 flex-1 flex flex-col min-h-screen">
+      {/* Responsive Change: pl-0 on mobile, lg:pl-64 on desktop */}
+      <div className="pl-0 lg:pl-64 flex-1 flex flex-col min-h-screen w-full overflow-x-hidden">
         {/* Header */}
-        <header className="h-16 bg-white/85 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-40 px-8 flex justify-between items-center shadow-sm">
-          <div className="font-extrabold text-sm text-slate-700 tracking-tight flex items-center gap-1.5">
-            🏢 {user?.tenantName || 'HRMS'}
+        <header className="h-16 bg-white/85 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-30 px-4 lg:px-8 flex justify-between items-center shadow-sm w-full">
+          <div className="flex items-center gap-3 lg:gap-1.5">
+            {/* Hamburger Menu for Mobile /* Responsive Change */}
+            <button 
+              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+            <div className="font-extrabold text-sm text-slate-700 tracking-tight hidden sm:flex items-center gap-1.5">
+              🏢 {user?.tenantName || 'HRMS'}
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {/* ── Notification Bell ── */}
@@ -218,8 +247,8 @@ export default function Layout() {
 
               {/* ── Dropdown ── */}
               {showNotif && (
-                <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden z-[100]"
-                     style={{ maxHeight: '480px' }}>
+                <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden z-[100] origin-top-right transform transition-all"
+                     style={{ maxHeight: '480px', right: '-1rem', '@media (min-width: 640px)': { right: 0 } }}>
                   {/* Header */}
                   <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
                     <div>
@@ -291,7 +320,8 @@ export default function Layout() {
         </header>
 
         {/* Page Body */}
-        <main className="px-8 py-8 flex-1 max-w-7xl w-full mx-auto">
+        {/* Responsive Change: reduce padding on mobile */}
+        <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8 flex-1 max-w-7xl w-full mx-auto overflow-x-hidden">
           <Outlet />
         </main>
       </div>

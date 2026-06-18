@@ -27,7 +27,7 @@ export default function AISearchPage() {
     setResults(null);
     try {
       const response = await aiAPI.search(searchQuery);
-      setResults(response.data);
+      setResults(response.data.data);
       if (q) setQuery(q);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Search failed');
@@ -45,7 +45,7 @@ export default function AISearchPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl">
+      <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-2xl">
         <div 
           className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${tab === 0 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
           onClick={() => setTab(0)}

@@ -43,14 +43,14 @@ export default function ApprovalsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200/50">
+      {/* Page Header /* Responsive Change: stack on mobile */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-4 border-b border-slate-200/50">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Approvals</h1>
           <p className="text-xs text-slate-500 mt-1 font-medium">{data.totalPending} pending action{data.totalPending !== 1 ? 's' : ''}</p>
         </div>
         <button 
-          className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 bg-white text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-50 transition-colors shadow-sm" 
+          className="inline-flex justify-center w-full sm:w-auto items-center gap-1.5 px-4 py-2 border border-slate-200 bg-white text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-50 transition-colors shadow-sm" 
           onClick={load}
         >
           🔄 Refresh
@@ -58,7 +58,7 @@ export default function ApprovalsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl">
+      <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-2xl">
         <div 
           className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center ${tab === 0 ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`} 
           onClick={() => setTab(0)}
